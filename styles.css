@@ -1,0 +1,23 @@
+
+
+.table-caption{
+    color: black;
+    font-weight: bold;
+    font-size: large;
+    caption-side: top;
+    text-align: center;
+    padding-top: 20px;
+}
+
+table tbody td {
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+}
+
+thead {
+    text-align: center;
+    background-color:darkgrey;
+    font-weight: 500;
+}

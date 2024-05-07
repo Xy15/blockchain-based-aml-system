@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Officers</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="jquery-3.6.3.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.4/dist/sweetalert2.all.min.js"></script>
+    <script src="node_modules/web3/dist/web3.min.js"></script>
+    <script type="text/javascript" src="connectContract.js"></script>
+    <script type="text/javascript" src="navBar.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+
+        #userListDiv
+        {
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            margin-left: 5%;
+            margin-right: 5%;
+            padding-left: 20px;
+            padding-right: 20px;
+            padding-bottom: 20px;
+            transform: translate(-50,-50);
+            border-radius: 10px;
+        }
+
+        #userTable {
+            width: 100%; 
+            margin: 0 auto;
+            margin-top: 40px;
+            margin-bottom: 10px;
+            border: 1px solid #000;
+            border-radius: 10px;
+            text-align: left;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #userListTitle {
+            text-align: center;
+            background-color: #000;
+            color: aliceblue;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        #userTable th{
+            background-color: black;
+            color: white;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        #userTable tr:hover{
+            background-color: gray;
+            cursor: pointer;
+            color: white;
+        }
+
+        #searchUserBtn{
+            background-color: black;
+            color: white;
+            border-radius: 5px;
+        }
+
+        #searchUserBtn:hover{
+            background-color: gray;
+        }
+    </style>
+
+</head>
+
+<body style="background-color:white;" onload="getUserInfo()">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">AML</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="AdminViewUsers.html">Home</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="txHistory.html" role="button" aria-expanded="false">View Transactions</a>
+                        <ul class="dropdown-menu">
+                          <li><a class="dropdown-item" href="txHistory.html">Transaction History</a></li>
+                          <li><a class="dropdown-item" href="susTx.html">Suspicious Transactions</a></li>
+                          <li><a class="dropdown-item" href="case.html">View Cases</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="officer.html" role="button" aria-expanded="false">Manage Users</a>
+                        <ul class="dropdown-menu">
+                          <li><a class="dropdown-item" href="officer.html">Manage Clients</a></li>
+                          <li><a class="dropdown-item" href="OfficerRegistration.html">Register Officer</a></li>
+                          <li><a class="dropdown-item" href="OfficerRegisterClient.html">Register Client</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="OfficerViewAppeals.html">View Appeals</a>
+                    </li>
+                </ul>
+                <div class="input-group">
+                    <input id="searchAcc" name="searchAcc" type="text" class="form-control" placeholder="Address" minlength="42" maxlength="42">
+                    <div class="input-group-append">
+                        <button class="btn btn-dark" type="button" onclick="getUserProfile(document.getElementById('searchAcc').value)">Search</button>
+                    </div>
+                </div>
+                <span id="usernameBanner" class="navbar-brand ms-auto">Welcome !</span>
+                <button class="btn btn-danger" id="logoutButton" onclick="logout()">Logout</button>
+            </div>
+        </div>      
+      </nav>
+
+    <div id ="userListDiv" class="mt-4">
+        <h1 id = "userListTitle">User List</h1>
+        <label for="searchUser">Search for Users:</label>
+        <input type="text" id="searchUser" name="searchUser" placeholder="Enter a OfficerID.">
+        <button id="searchUserBtn" onclick="searchUser()">Search</button>
+        <table id="userTable">
+            <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Officer ID</th>
+                <th>Name</th>
+                <th>Phone Number</th>
+                <th>Email</th>
+            </tr>
+            </thead>
+            <tbody id="userList">
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const allowRole = ['Admin Officer'];
+        function searchUser(){
+            var userSearch = encodeURIComponent(document.getElementById("searchUser").value);
+            console.log("Searching for:", userSearch);
+            window.location.href = `AdminManageOfficers.html?id=${userSearch}`;
+            document.getElementById("searchUser").value = "";
+        }
+
+         async function getUserInfo() {
+            try {
+                const token = localStorage.getItem('jwtToken');
+                console.log(token);
+
+                if (!token) {
+                    console.log('No token available.');
+                    return;
+                }
+
+                const response = await fetch('http://localhost:3000/officers', {
+                    method: 'GET',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to Connect.');
+                }
+
+                const users = await response.json();
+                const officers = users.officers;
+                console.log('Connected Successfully.');
+                console.log(officers);
+
+                const userList = document.getElementById('userList');
+                officers.forEach((user) => {
+                    const row = document.createElement('tr');
+                    row.addEventListener('click', () => {
+                        window.location.href = `AdminManageOfficers.html?id=${user.officerID}`;
+                    });
+
+                    const userIDCell = document.createElement('td');
+                    userIDCell.textContent = user.userID;
+                    row.appendChild(userIDCell);
+
+                    const clientIDCell = document.createElement('td');
+                    clientIDCell.textContent = user.officerID;
+                    row.appendChild(clientIDCell);
+
+                    const nameCell = document.createElement('td');
+                    nameCell.textContent = user.fullName;
+                    row.appendChild(nameCell);
+
+                    const phoneCell = document.createElement('td');
+                    phoneCell.textContent = user.phoneNo;
+                    row.appendChild(phoneCell);
+
+                    const emailCell = document.createElement('td');
+                    emailCell.textContent = user.email;
+                    row.appendChild(emailCell);
+
+                    userList.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching users:', error);
+            }
+         }
+
+    </script>
+</body>
+</html>

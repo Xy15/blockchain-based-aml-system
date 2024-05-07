@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Recent Transactions</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.4/dist/sweetalert2.all.min.js"></script>
+    <script type="text/javascript" src="jquery-3.6.3.js"></script>
+    <script src="node_modules/web3/dist/web3.min.js"></script>
+    <script type="text/javascript" src="connectContract.js"></script>
+    <script type="text/javascript" src="navBar.js"></script>
+    <script type="text/javascript" src="general.js"></script>
+    
+    <script>
+        const allowRole = ['Client','Officer', 'Admin Officer'];
+        $(document).ready(async function() {
+            if(sessionStorage.getItem("role") == "Client"){
+                showSection('clientNav');
+            }else if(sessionStorage.getItem("role") == "Officer"){
+                showSection('officerNav');
+            }else {
+                showSection('adminNav');
+            }
+            getRecentTx(100,0);
+        })
+    </script>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="#">AML</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+
+          <ul class="navbar-nav d-none hide" id="clientNav">
+            <li class="nav-item">
+              <a class="nav-link" href="profile.html">Home</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="transfer.html" role="button"
+                aria-expanded="false">Make Transaction</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="transfer.html?event=deposit" data-event-type="deposit">Deposit</a></li>
+                <li><a class="dropdown-item" href="transfer.html?event=withdraw" data-event-type="withdraw">Withdraw</a></li>
+                <li><a class="dropdown-item" href="transfer.html?event=transfer" data-event-type="transfer">Transfer</a></li>
+              </ul>
+            </li>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="ClientManageProfile.html">Profile</a>
+            </li>
+            <li class="nav-item" style="width: 120px;">
+              <a class="nav-link" href="ClientSubmitAppeal.html">Submit Appeal</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="txHistory.html">Recent Transactions</a>
+            </li>
+          </ul>
+
+          <ul class="navbar-nav d-none hide" id="officerNav">
+            <li class="nav-item">
+                <a class="nav-link" href="officer.html">Home</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="txHistory.html" role="button" aria-expanded="false">View Transactions</a>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="txHistory.html">Transaction History</a></li>
+                  <li><a class="dropdown-item" href="susTx.html">Suspicious Transactions</a></li>
+                  <li><a class="dropdown-item" href="case.html">View Cases</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="OfficerRegisterClient.html">Register Client</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="OfficerViewAppeals.html">View Appeals</a>
+            </li>
+        </ul>
+        
+          <ul class="navbar-nav d-none hide" id="adminNav">
+            <li class="nav-item">
+                <a class="nav-link" href="AdminViewUsers.html">Home</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="txHistory.html" role="button" aria-expanded="false">View Transactions</a>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="txHistory.html">Transaction History</a></li>
+                  <li><a class="dropdown-item" href="susTx.html">Suspicious Transactions</a></li>
+                  <li><a class="dropdown-item" href="case.html">View Cases</a></li>
+                </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="officer.html" role="button" aria-expanded="false">Manage Users</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="officer.html">Manage Clients</a></li>
+                <li><a class="dropdown-item" href="OfficerRegistration.html">Register Officer</a></li>
+                <li><a class="dropdown-item" href="OfficerRegisterClient.html">Register Client</a></li>
+              </ul>
+          </li>
+            <li class="nav-item">
+              <a class="nav-link" href="OfficerViewAppeals.html">View Appeals</a>
+            </li>
+        </ul>
+          <div class="input-group">
+            <input id="searchAcc" name="searchAcc" type="text" class="form-control" placeholder="Address" minlength="42"
+              maxlength="42">
+            <div class="input-group-append">
+              <button class="btn btn-dark" type="button"
+                onclick="getUserProfile(document.getElementById('searchAcc').value)">Search</button>
+            </div>
+          </div>
+          <span id="usernameBanner" class="navbar-brand ms-auto">Welcome !</span>
+          <button class="btn btn-danger" id="logoutButton" onclick="logout()">Logout</button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+    <table class="table table-bordered">
+        <caption class="table-caption">Recent Transactions</caption>
+        <thead>
+            <tr>
+                <td>Transaction Hash</td>
+                <td>Timestamp</td>
+                <td>Sender</td>
+                <td>Receiver</td>
+                <td>Type</td>
+                <td>Transaction Description</td>
+                <td>Amount (RM)</td>
+            </tr>
+        </thead>
+        <tbody id="txList">
+        </tbody>
+    </table>
+</div>
+</body>
+
+</html>

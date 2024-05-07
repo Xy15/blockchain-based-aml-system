@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Appeal</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body{
+            font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            background-color: white;
+            justify-content: center;
+            align-items: center;
+        }
+        #appealTitle
+        {
+            text-align: center;
+            background-color: #000;
+            color: white;
+        }
+        #appealDetailHead
+        {
+            margin-left: 30%;
+            margin-right: 30%;
+            border: 2px solid #000;
+            padding-left: 20px;
+            transform: translate(-50,-50);
+        }
+
+        #appealDetail
+        {
+            margin-left: 30%;
+            margin-right: 30%;
+            border: 2px solid #000;
+            padding-left: 20px;
+            transform: translate(-50,-50);
+        }
+
+        #appealDetailTitle
+        {
+            border: 2px solid #000;  
+            margin-right: 20px;
+            text-align: center;
+            padding-left: 5%;
+            padding-right: 5%;
+            background-color: #000;
+            color: white;
+        }
+
+        .dynamicButton{
+            padding: 5px 5px;
+            background-color: black;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .dynamicButton:hover {
+            background-color: gray;
+        }
+
+        #statusBtn {
+            text-align: center;
+        }
+
+        #approveAppeal,
+        #rejectAppeal{
+            padding: 10px 10px;
+            font-size: 20px;
+            background-color: black;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #approveAppeal:hover,
+        #rejectAppeal:hover{
+            background-color: gray;
+        }
+    </style>
+
+</head>
+
+<body style="background-color:white;" onload="getAppeals()">
+    <h1 id = "appealTitle">Appeal <span id="aID"></span> </h1>
+    <div id="appealDetailHead"></div>
+    <div id="appealDetail"></div><br>
+    <div id = "statusBtn">
+        <button type="button" id = "approveAppeal" onclick="updateAppeal('APPROVED')">Approve</button>
+        <button type="button" id = "rejectAppeal" onclick="updateAppeal('REJECTED')">Reject</button>
+    </div>
+
+    <script>
+        async function updateAppeal(status){           
+            const urlParams = new URLSearchParams(window.location.search);
+            const appealID = urlParams.get('id');
+            console.log("The appealID is ", appealID);
+
+            try {
+                const token = localStorage.getItem('jwtToken');
+                console.log(token);
+
+                if (!token) {
+                    console.log('No token available.');
+                    return;
+                }
+
+                const response = await fetch('http://localhost:3000/updateAppeal', {
+                method: 'POST', 
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ appealID, status }),
+                });
+
+                if (response.ok) {
+                    console.log('Appeal updated succesfully.');
+                    } else {
+                    console.error('Could not update appeal.');
+                    } 
+                window.location.href = "OfficerAppealSucessful.html";
+        }catch (error) {
+                console.error('Error updating appeal:', error);
+                window.alert('Please try again.');
+            }
+        }
+
+         async function getAppeals() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const appealID = urlParams.get('id');
+            console.log("The appealID is ", appealID);
+
+            try {
+                const token = localStorage.getItem('jwtToken');
+                console.log(token);
+
+                if (!token) {
+                    console.log('No token available.');
+                    return;
+                }
+
+                const response = await fetch('http://localhost:3000/getAppealDetail', {
+                method: 'POST', // Change the method to POST
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ appealID }),
+                });
+
+
+                if (!response.ok) {
+                    throw new Error('Failed to Connect.');
+                }
+
+                const data = await response.json();
+                const appeal = data.appeal;
+                console.log('Connected Successfully.');
+                console.log(appeal);
+
+                const appealListHead = document.getElementById('appealDetailHead');
+                document.getElementById('aID').textContent = `${appeal.appealID}`;
+                appealListHead.innerHTML = 
+                `
+                <h4 id = "appealDetailTitle">User Details</h4>
+                <p>ClientID: ${appeal.clientID}</p>
+                <p>Name: ${appeal.name}</p>
+                <p>Phone: ${appeal.phoneNo}</p>
+                <p>Email: ${appeal.email}</p>
+                <p>Blacklist Status: ${appeal.isBlacklisted}</p>
+                <p>Risk Score: ${appeal.riskScore}</p>
+                <p>Account Status: ${appeal.accStatus}</p>
+                `;
+
+
+                //reformat date
+                let formattedDate;
+                const appealDate = new Date(appeal.appealDate);
+                if (!isNaN(appealDate)) {
+                        const year = appealDate.getFullYear();
+                        const month = String(appealDate.getMonth() + 1).padStart(2, '0');
+                        const day = String(appealDate.getDate()).padStart(2, '0');
+                        formattedDate = `${year}-${month}-${day}`;
+                    } else {
+                        formattedDate = "Invalid date.";
+                    }
+                
+                const appealList = document.getElementById('appealDetail');
+                console.log(data.downloadLink);
+                appealList.innerHTML = 
+                `
+                <h4 id = "appealDetailTitle">Appeal</h4>
+                <p>Submitted Date: ${formattedDate}</p>
+                <p>Description: ${appeal.description}</p>
+                <p>Evidence: ${appeal.filename} <button onclick="window.location.href = 'http://localhost:3000/uploads/${appeal.filename}'" class="dynamicButton">Download File</button></p>
+                `;
+
+            } catch (error) {
+                console.error('Error fetching users:', error);
+            }
+         }
+
+    </script>
+</body>
+</html>

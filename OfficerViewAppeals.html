@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Appeals</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="jquery-3.6.3.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.4/dist/sweetalert2.all.min.js"></script>
+    <script type="text/javascript" src="navBar.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        #content {
+            background-color: white;
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            text-align: center;
+        }
+    
+        h1 {
+            background-color: black;
+            color: white;
+            padding: 10px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+    
+        table#appealListHead {
+            border-collapse: collapse;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+    
+        table#appealListHead th {
+            background-color: black;
+            color: white;
+            padding: 10px;
+        }
+    
+        table#appealList {
+            border-collapse: separate;
+            border-spacing: 0 10px; /* Adjust the spacing between rows */
+            width: 80%;
+            margin: auto;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+    
+        table#appealList td {
+            padding: 10px;
+            text-align: left;
+            border-top: 1px solid black; /* Add a top border to each cell */
+        }
+    
+        table#appealList td:first-child {
+            border-top: none; /* Remove top border for the first cell in each row */
+        }
+    
+        table#appealList td:hover {
+            background-color: gray;
+        }
+    
+        .viewButton {
+            background-color: black;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+    
+        .viewButton:hover {
+            background-color: gray;
+        }
+    </style>
+    
+    
+</head>
+
+<body style="background-color:white;" onload="getAppeals()">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">AML</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav d-none hide" id="officerNav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="officer.html">Home</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="txHistory.html" role="button" aria-expanded="false">View Transactions</a>
+                        <ul class="dropdown-menu">
+                          <li><a class="dropdown-item" href="txHistory.html">Transaction History</a></li>
+                          <li><a class="dropdown-item" href="susTx.html">Suspicious Transactions</a></li>
+                          <li><a class="dropdown-item" href="case.html">View Cases</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="OfficerRegisterClient.html">Register Client</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="OfficerViewAppeals.html">View Appeals</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav d-none hide" id="adminNav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="AdminViewUsers.html">Home</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="txHistory.html" role="button" aria-expanded="false">View Transactions</a>
+                        <ul class="dropdown-menu">
+                          <li><a class="dropdown-item" href="txHistory.html">Transaction History</a></li>
+                          <li><a class="dropdown-item" href="susTx.html">Suspicious Transactions</a></li>
+                          <li><a class="dropdown-item" href="case.html">View Cases</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="officer.html" role="button" aria-expanded="false">Manage Users</a>
+                        <ul class="dropdown-menu">
+                          <li><a class="dropdown-item" href="officer.html">Manage Clients</a></li>
+                          <li><a class="dropdown-item" href="OfficerRegistration.html">Register Officer</a></li>
+                          <li><a class="dropdown-item" href="OfficerRegisterClient.html">Register Client</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="OfficerViewAppeals.html">View Appeals</a>
+                    </li>
+                </ul>
+                <div class="input-group">
+                    <input id="searchAcc" name="searchAcc" type="text" class="form-control" placeholder="Address" minlength="42" maxlength="42">
+                    <div class="input-group-append">
+                        <button class="btn btn-dark" type="button" onclick="getUserProfile(document.getElementById('searchAcc').value)">Search</button>
+                    </div>
+                </div>
+                <span id="usernameBanner" class="navbar-brand ms-auto">Welcome !</span>
+                <button class="btn btn-danger" id="logoutButton" onclick="logout()">Logout</button>
+            </div>
+        </div>      
+      </nav>
+
+      <div id="content">
+    <h1>Appeal List</h1>
+    <table id="appealListHead">
+        <thead>
+          <tr>
+            <th colspan="4">Appeals</th>
+          </tr>
+        </thead>
+        <tbody id="appealList">
+        </tbody>
+      </table>
+    </div>
+    <script>
+        const allowRole = ['Officer', 'Admin Officer'];
+
+        $(document).ready(function() {
+            const role = sessionStorage.getItem("role");
+            if(role == "Officer"){
+                showSection('officerNav');
+            }else if(role == "Admin Officer"){
+                showSection('adminNav');
+            }
+        })
+        
+         async function getAppeals() {
+            try {
+                //check for JWT
+                const token = localStorage.getItem('jwtToken');
+                console.log(token);
+
+                if (!token) {
+                    console.log('No token available.');
+                    return;
+                }
+
+                //call to backend
+                const response = await fetch('http://localhost:3000/getAppeals', {
+                    method: 'GET',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to Connect.');
+                }
+
+                const data = await response.json();
+                if(data.appeals != null){
+                    const appeals = data.appeals;
+
+                const appealList = document.getElementById('appealList');
+                appeals.forEach((appeal) => {
+                    const row = document.createElement('tr');
+
+                    const appealIDCell = document.createElement('td');
+                    appealIDCell.textContent = appeal.appealID;
+                    row.appendChild(appealIDCell);
+
+                    const clientIDCell = document.createElement('td');
+                    clientIDCell.textContent = "Submitted by: " + appeal.clientID;
+                    row.appendChild(clientIDCell);
+
+                    const appealDateCell = document.createElement('td');
+                    const appealDate = new Date(appeal.appealDate);
+                    //reformat date
+                    if (!isNaN(appealDate)) {
+                        const year = appealDate.getFullYear();
+                        const month = String(appealDate.getMonth() + 1).padStart(2, '0');
+                        const day = String(appealDate.getDate()).padStart(2, '0');
+                        const formattedDate = `${year}-${month}-${day}`;
+                        appealDateCell.textContent = " on " + formattedDate;
+                    } else {
+                        appealDateCell.textContent = "Invalid date";
+                    }
+                    row.appendChild(appealDateCell);
+
+                    const viewCell = document.createElement('td');
+                    const viewButton = document.createElement('button');
+                    viewButton.textContent = 'View';
+                    viewButton.addEventListener('click', () => {
+                        window.location.href = `AppealDetails.html?id=${appeal.appealID}`;
+                    });
+                    viewCell.appendChild(viewButton);
+                    row.appendChild(viewCell);
+                    appealList.appendChild(row);
+                });
+                }else{
+                    window.alert("There are no appeals. Come back later.");
+                    window.location.href = window.history.back();
+                }    
+            } catch (error) {
+                console.error('Error fetching users:', error);
+            }
+         }
+
+    </script>
+</body>
+</html>

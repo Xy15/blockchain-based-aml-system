@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Register User</title>
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.4/dist/sweetalert2.all.min.js"></script>
+  <script type="text/javascript" src="navBar.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      #content {
+        font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        background: linear-gradient(to bottom, black, darkblue);
+        justify-content: center;
+        align-items: center;
+        margin: 0;
+        padding: 0;
+      }
+
+        .top-menu {
+            background-color: #333;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .top-menu ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .top-menu li {
+            float: left;
+        }
+
+        .top-menu li a {
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+        .top-menu li a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        .top-menu #usernameDisplay{
+            text-align: right;
+            font-weight: bold;
+            color: white;
+            padding-right: 20px;
+        }
+
+      #regFormTitle {
+        background-color: black;
+        color: white;
+        text-align: center;
+        padding: 5px;
+        margin-left: 25px;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+      }
+
+      .regFormBlock {
+        margin: 0 auto;
+        width: 80%;
+        max-width: 600px;
+        background-color: white;
+        border-radius: 15px;
+        padding-left: 15px;
+        padding-right: 40px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        max-width: 80%;
+        width: 400px;
+      }
+
+      .regFormBlock input[type="text"],
+      .regFormBlock input[type="password"],
+      .regFormBlock input[type="email"],
+      .regFormBlock textarea,
+      .regFormBlock input[type="date"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 20px;
+      }
+
+      .regDropButton,
+      #regSubmitBtn {
+        background-color: black;
+        cursor: pointer;
+        padding: 8px 14px;
+        width: 50%;
+        margin-left: 25%;
+        margin-right: 25%;
+        border: none;
+        text-align: center;
+        outline: none;
+        border-radius: 8px;
+        font-size: 15px;
+        margin-top: 8px;
+        margin-bottom: 10px;
+        font-weight: bold;
+        color: aliceblue;
+      }
+
+      .active,
+      .regDropButton:hover {
+        background-color: gray;
+      }
+
+      .uInfoDropDown {
+        display: none;
+        overflow: hidden;
+        background-color: white;
+        margin-top: 8px;
+        margin-bottom: 8px;
+        padding-top: 10px;
+        padding-left: 15px;
+        padding-right: 40px;
+        border-radius: 8px;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Your existing styles here */
+
+      .loading-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.7);
+          display: none;
+          justify-content: center;
+          align-items: center;
+          z-index: 9999;
+      }
+
+      .loader {
+          border: 8px solid #f3f3f3;
+          border-top: 8px solid #3498db;
+          border-radius: 50%;
+          width: 50px;
+          height: 50px;
+          animation: spin 2s linear infinite;
+      }
+
+      .loading-message {
+          color: white;
+          font-size: 20px;
+          margin-top: 20px;
+      }
+
+      @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+      }
+
+    </style>
+<body>
+</head>
+
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+      <a class="navbar-brand" href="#">AML</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav d-none hide" id="officerNav">
+          <li class="nav-item">
+              <a class="nav-link" href="officer.html">Home</a>
+          </li>
+          <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="txHistory.html" role="button" aria-expanded="false">View Transactions</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="txHistory.html">Transaction History</a></li>
+                <li><a class="dropdown-item" href="susTx.html">Suspicious Transactions</a></li>
+                <li><a class="dropdown-item" href="case.html">View Cases</a></li>
+              </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="OfficerRegisterClient.html">Register Client</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="OfficerViewAppeals.html">View Appeals</a>
+          </li>
+      </ul>
+      <ul class="navbar-nav d-none hide" id="adminNav">
+        <li class="nav-item">
+            <a class="nav-link" href="AdminViewUsers.html">Home</a>
+        </li>
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="txHistory.html" role="button" aria-expanded="false">View Transactions</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="txHistory.html">Transaction History</a></li>
+              <li><a class="dropdown-item" href="susTx.html">Suspicious Transactions</a></li>
+              <li><a class="dropdown-item" href="case.html">View Cases</a></li>
+            </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="officer.html" role="button" aria-expanded="false">Manage Users</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="officer.html">Manage Clients</a></li>
+            <li><a class="dropdown-item" href="OfficerRegistration.html">Register Officer</a></li>
+            <li><a class="dropdown-item" href="OfficerRegisterClient.html">Register Client</a></li>
+          </ul>
+      </li>
+        <li class="nav-item">
+          <a class="nav-link" href="OfficerViewAppeals.html">View Appeals</a>
+        </li>
+    </ul>
+          <div class="input-group">
+              <input id="searchAcc" name="searchAcc" type="text" class="form-control" placeholder="Address" minlength="42" maxlength="42">
+              <div class="input-group-append">
+                  <button class="btn btn-dark" type="button" onclick="getUserProfile(document.getElementById('searchAcc').value)">Search</button>
+              </div>
+          </div>
+          <span id="usernameBanner" class="navbar-brand ms-auto">Welcome !</span>
+          <button class="btn btn-danger" id="logoutButton" onclick="logout()">Logout</button>
+      </div>
+  </div>      
+</nav>
+
+<div id="content">
+  <div class="regFormBlock">
+    <h1 id = "regFormTitle">Client Registration</h1>
+    <form id="ClientRegistrationForm" onsubmit="submitForm(event)">
+      <label for="uName">Username:</label><br>
+      <input type="text" id="uName" name="uName" onblur="checkUnameUnique(this.value)" required><br>
+      <span id="uNameErrorMsg"></span> <br>
+      <label for="uPass">Password:</label><br>
+      <input type="password" id="uPass" name="uPass" oninput="comparePass('password')" required><br><br>
+      <label for="confPass">Confirm Password:</label><br>
+      <input type="password" id="confPass" name="confPass" oninput="comparePass('password')" required><br>
+      <span id="passwordErrMsg" style="display: none;vertical-align: top; color:red"></span><br>
+      <label for="secPhrase">Security Phrase: </label><br>
+      <input type="password" id="secPhrase" name="secPhrase" oninput="comparePass('secPhrase')" required><br><br>
+      <label for="confSecPhrase">Confirm Security Phrase:</label><br>
+      <input type="password" id="confSecPhrase" name="confSecPhrase" oninput="comparePass('secPhrase')" required><br>
+      <span id="secPhraseErrMsg" style="display: none;vertical-align: top;color:red"></span><br>
+      <button onclick="regDropdown()" class="regDropButton" id="regDropButton">Confirm</button>
+      <br><br>
+  
+      <div class = "RegDropdown">
+        <div id = "uInfoDropDown" class="uInfoDropDown">
+          <label for="fullName">Name:</label><br>
+          <input type="text" id="fullName" name="fullName" required><br><br>
+          <label for="phoneNum">Phone:</label><br>
+          <input type="text" id="phoneNum" name="phoneNum" required><br><br>
+          <label for="email">Email:</label><br>
+          <input type="email" id="email" name="email" required><br><br>
+          <label for="address">Address:</label><br>
+          <textarea id="address" name="address" rows="4" cols="50" required></textarea><br><br>
+          <label for="DOB">Date of Birth:</label><br>
+          <input type="date" id="DOB" name="DOB" required><br><br>
+          <label for="ethAddress">Ethereum Wallet Address:</label><br>
+          <input type="text" id="ethAddress" name="ethAddress" required><br><br>
+          <button id="regSubmitBtn" type="submit">Register</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loader"></div>
+    <p class="loading-message" id="loadingMessage">Connecting to the blockchain......</p>
+  </div>
+ 
+</div>
+  <script>
+    const allowRole = ['Officer' , 'Admin Officer'];
+$(document).ready(function() {
+  const role = sessionStorage.getItem("role");
+    if(role == "Officer"){
+        showSection('officerNav');
+    }else if(role == "Admin Officer"){
+        showSection('adminNav');
+    }
+  })
+
+
+    function regDropdown() {
+  let allRequiredFields = true;
+  document.querySelectorAll('#ClientRegistrationForm [required]:not(.uInfoDropDown [required])').forEach(function (i) {
+    
+    if (!i.value.trim()) {
+      allRequiredFields = false;
+    }
+  });
+
+  console.log(allRequiredFields);
+
+  if (allRequiredFields) {
+    var toggleButton = document.getElementById("regDropButton");
+    if (toggleButton.innerHTML === "Confirm") {
+      toggleButton.innerHTML = "Cancel";
+    } else {
+      toggleButton.innerHTML = "Confirm";
+    }
+
+    var button = document.querySelector('.RegDropdown button');
+    var content = document.querySelector('.RegDropdown .uInfoDropDown');
+    button.classList.toggle("active");
+
+    if (content.style.display === "block") {
+      content.style.display = "none";
+    } else {
+      content.style.display = "block";
+    }
+  } else {
+    alert('Please fill in all the required fields.');
+  }
+}
+
+
+    function comparePass(param){
+      passwordInput = document.getElementById("uPass");
+      confPassInput = document.getElementById("confPass");
+      passwordInputMsg = document.getElementById("passwordErrMsg");
+      secPhraseInput = document.getElementById("secPhrase");
+      confSecPhraseInput = document.getElementById("confSecPhrase");
+      secPhraseInputMsg = document.getElementById("secPhraseErrMsg");
+
+      if(param === "password"){
+        if(passwordInput.value !== confPassInput.value)
+        {
+            passwordInputMsg.textContent = "Passwords do not match";
+            passwordInputMsg.style.display = "block";
+        }else{
+            passwordInputMsg.textContent = " ";
+            passwordInputMsg.style.display = "none";
+        }
+        console.log(passwordInput.value, confPassInput.value);
+      }else{
+        if(secPhraseInput.value !== confSecPhraseInput.value)
+        {
+          secPhraseInputMsg.textContent = "Security Phrases do not match";
+          secPhraseInputMsg.style.display = "block";
+        }else{
+            secPhraseInputMsg.textContent = " ";
+            secPhraseInputMsg.style.display = "none";
+        }
+        console.log(secPhraseInput.value, confSecPhraseInput.value);
+      }
+      }
+
+    async function checkUnameUnique(uName){
+      let isExistN = true;
+      while (isExistN) {
+        isExistN = await checkIDUnique('user', 'username', uName);
+        if (isExistN) {
+          uName = uName + (Math.floor(Math.random() * 900) + 100);
+          console.log(`Username already exists. Generating new username: (${uName})`);
+          document.getElementById("uNameErrorMsg").textContent = "Username already taken. Suggested a new username.";
+          isExistN = await checkIDUnique('user', 'username', uName);
+        }else{
+          document.getElementById("uNameErrorMsg").textContent = " ";
+        }
+      }
+      document.getElementById("uName").value = uName;
+    }
+
+    async function submitForm(event) {
+      event.preventDefault();
+      showLoadingOverlay();
+      //get form data
+      const registerForm = document.getElementById('ClientRegistrationForm');
+      const registerFormData = new FormData(registerForm);
+
+      //generate ID
+      userID = 'U' + (Math.floor(Math.random() * 90000) + 10000);
+      clientID = 'C' + (Math.floor(Math.random() * 90000) + 10000);
+
+      //generate default accNo
+      accNo = Math.floor(Math.random() * (99999999999 - 10000000000 + 1)) + 10000000000;
+      console.log(accNo);
+
+      //check ID uniqueness
+      let isExistU = true;
+      while (isExistU) {
+        isExistU = await checkIDUnique('user', 'userID', userID);
+        if (isExistU) {
+          userID = 'U' + (Math.floor(Math.random() * 90000) + 10000);
+          console.log(`ID already exists. Generating new user ID: (${userID})`);
+          isExistU = await checkIDUnique('user', 'userID', userID);
+        }
+      }
+      //console.log(isExistU);
+      //console.log(userID);
+      let isExistC = true;
+      while (isExistC) {
+        isExistC = await checkIDUnique('client', 'clientID', clientID);
+        if (isExistC) {
+          clientID = 'C' + (Math.floor(Math.random() * 90000) + 10000);
+          console.log(`ID already exists. Generating new client ID: (${clientID})`);
+          isExistC = await checkIDUnique('client', 'clientID', clientID);
+        }
+      }
+      //console.log(isExistC);
+      //console.log(clientID);
+
+      //check accNo uniqueness
+      let isExistB = true;
+      while (isExistB) {
+        isExistB = await checkIDUnique('bankaccount', 'accNo', accNo);
+        if (isExistB) {
+          Math.floor(Math.random() * ((Math.pow(10, 10)) - (Math.pow(10, 11) - 1) + 1)) + (Math.pow(10, 11) - 1);
+          console.log(`Account Number already exists. Generating new one: (${accNo})`);
+          isExistB = await checkIDUnique('bankaccount', 'accNo', accNo);
+        }
+      }
+
+      const userInfo = {
+        uID: userID,
+        cID: clientID,
+        uName: registerFormData.get('uName'),
+        uPass: registerFormData.get('uPass'),
+        secPhrase: registerFormData.get('secPhrase'),
+        fName: registerFormData.get('fullName'),
+        phNo: registerFormData.get('phoneNum'),
+        email: registerFormData.get('email'),
+        address: registerFormData.get('address'),
+        DOB: registerFormData.get('DOB'),
+      }
+      console.log(userInfo);
+
+      try{
+        const hashValue = await digestMessage(userInfo);
+        await insertUserHash(hashValue, userID);
+        await insertUserDetails(userInfo);
+        const accounts = await ethereum.request({ method: 'eth_accounts' });
+        const ethAddress = document.getElementById("ethAddress").value;
+        console.log(ethAddress);
+        await createBankAccount(userInfo, ethAddress, accNo);
+        console.log("User registered successfully.");
+        console.log("Register Successful. Redirecting...");
+        window.location.href = 'ClientRegisterSuccessful.html';
+        
+      }catch(error){
+        console.log("User not registered.", error);
+        console.log("Registration Unsuccessful. Not redirecting.");
+        alert("Something went wrong. Please try again.");
+      }
+      finally {
+        hideLoadingOverlay();
+    }
+    }
+
+    async function digestMessage(uInfo) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(JSON.stringify(uInfo));
+      const crypto = window.crypto || window.msCrypto;
+      const hashRaw = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashRaw));
+      const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+      return hashHex;
+    }
+
+
+    async function connectToMetaMask() {
+      if (window.ethereum && typeof window.ethereum.request === 'function') {
+        try {
+          await ethereum.request({ method: 'eth_requestAccounts' });
+          const accounts = await ethereum.request({ method: 'eth_accounts' });
+          console.log('Connected to MetaMask:', accounts[0]);
+          return accounts[0];
+        } catch (error) {
+          console.error('Failed to connect to MetaMask:', error);
+          throw error;
+          return null;
+        }
+      } else {
+        console.error('MetaMask extension is not found.');
+        throw error;
+        return null;
+      }
+    }
+    
+    // Insert user hash into the blockchain
+  async function insertUserHash(userHash, userID) {
+  try {
+    const web3 = new Web3(ethereum);
+    const uHash = userHash;
+    const uID = userID;
+    const userAddress = await connectToMetaMask();
+
+    const contractAddress = "0x44d160f0345249590dbD4A36133D82e09Bc8Fc1B";
+    const contractABI = [
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "string",
+            "name": "userID",
+            "type": "string"
+          },
+          {
+            "indexed": false,
+            "internalType": "string",
+            "name": "hash",
+            "type": "string"
+          }
+        ],
+        "name": "UserHashStored",
+        "type": "event"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "userID",
+            "type": "string"
+          }
+        ],
+        "name": "getUserHash",
+        "outputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "userID",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "hash",
+            "type": "string"
+          }
+        ],
+        "name": "storeUserHash",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ];
+
+    const contract = new web3.eth.Contract(contractABI, contractAddress);
+    if (userAddress) {
+      await contract.methods.storeUserHash(uID, uHash).send({ from: userAddress });
+
+      console.log('User hash inserted successfully!');
+    } else {
+      console.error('Unable to connect to Metamask.');
+      throw new Error('Unable to connect to MetaMask.');
+    }
+    } catch (error) {
+      console.error('Unable to insert user hash:', error);
+      throw error;
+    }
+    //return userAddress;
+    }
+
+    async function insertUserDetails(uInfo) {
+  try {
+    const response = await fetch('http://localhost:3000/insert-UserToDatabase', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(uInfo),
+    });
+
+    if (response.ok) {
+      console.log('User details inserted successfully');
+    } else {
+      console.error('Error inserting user details');
+    }
+  } catch (error) {
+    console.error('Error inserting user details:', error);
+    throw error;
+  }
+}
+
+async function createBankAccount(uInfo, ethAddress, accNo) {
+  try {
+    const response = await fetch('http://localhost:3000/insert-BankAccount', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ uInfo, ethAddress, accNo }),
+    });
+
+    if (response.ok) {
+      console.log('Account created successfully.');
+    } else {
+      console.error('Error creating account.');
+    }
+  } catch (error) {
+    console.error('Error creating account:', error);
+    throw error;
+  }
+}
+
+
+    async function checkIDUnique(table, tableColumn, idVal) {
+      try {
+        let isUnique = false;
+        let attemptCount = 0;
+        
+        while (!isUnique) {
+          //send to backend
+          const response = await fetch('http://localhost:3000/checkUnique', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ table, tableColumn, idVal }),
+          });
+
+          if (response.ok) {
+            const { isExist } = await response.json();
+            return isExist;
+          } else {
+            console.error('Error checking ID uniqueness:', response.statusText);
+            throw new Error('Error checking ID uniqueness');
+          }
+        }
+      } catch (error) {
+        console.error('Error checking ID uniqueness:', error);
+      }
+    }
+
+    function showLoadingOverlay() {
+        var loadingOverlay = document.getElementById("loadingOverlay");
+        var loadingMessage = document.getElementById("loadingMessage");
+        loadingOverlay.style.display = "flex";
+        loadingMessage.textContent = "Connecting to Blockchain......";
+    }
+
+    function hideLoadingOverlay() {
+        var loadingOverlay = document.getElementById("loadingOverlay");
+        loadingOverlay.style.display = "none";
+    }
+
+  </script>
+</body>
+</html>

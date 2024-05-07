@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Edit Profile</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.4/dist/sweetalert2.all.min.js"></script>
+    <script type="text/javascript" src="navBar.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        #content {
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .ClientProfile {
+            text-align: left;
+            background-color: white;
+            border-radius: 15px;
+            padding: 0px 25px 15px 25px;
+            margin: 0 auto;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 600px;
+        }
+
+
+        .ClientProfile h1 {
+            background-color: black;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .ClientProfile button {
+            background-color: black;
+            cursor: pointer;
+            padding: 8px 14px;
+            width: 50%;
+            margin-left: 25%;
+            margin-right: 25%;
+            border: none;
+            text-align: center;
+            outline: none;
+            border-radius: 8px;
+            font-size: 15px;
+            margin-top: 8px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: aliceblue;
+        }
+
+        .ClientProfile button:hover {
+            background-color: gray;
+        }
+
+        .loading-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.7);
+          display: none;
+          justify-content: center;
+          align-items: center;
+          z-index: 9999;
+      }
+
+        #ClientEditForm input[type="text"],
+        #ClientEditForm input[type="password"],
+        #ClientEditForm input[type="email"],
+        #ClientEditForm textarea,
+        #ClientEditForm input[type="date"] {
+        width: 95%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 15px;
+      }
+
+      .loader {
+          border: 8px solid #f3f3f3;
+          border-top: 8px solid #3498db;
+          border-radius: 50%;
+          width: 50px;
+          height: 50px;
+          animation: spin 2s linear infinite;
+      }
+
+      .loading-message {
+          color: white;
+          font-size: 20px;
+          margin-top: 20px;
+      }
+
+      @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+      }
+    </style>
+
+</head>
+
+<body style="background-color:white;" onload="getProfileInfo()">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">AML</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="profile.html">Home</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="transfer.html" role="button" aria-expanded="false">Make Transaction</a>
+                        <ul class="dropdown-menu">
+                          <li><a class="dropdown-item" href="transfer.html?event=deposit" data-event-type="deposit">Deposit</a></li>
+                          <li><a class="dropdown-item" href="transfer.html?event=withdraw" data-event-type="withdraw">Withdraw</a></li>
+                          <li><a class="dropdown-item" href="transfer.html?event=transfer" data-event-type="transfer">Transfer</a></li>
+                        </ul>
+                      </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="ClientManageProfile.html">Profile</a>
+                    </li>
+                    <li class="nav-item" style="width: 120px;">
+                        <a class="nav-link" href="ClientSubmitAppeal.html">Submit Appeal</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="txHistory.html">Recent Transactions</a>
+                    </li>
+                </ul>
+                <div class="input-group">
+                    <input id="searchAcc" name="searchAcc" type="text" class="form-control" placeholder="Address" minlength="42" maxlength="42">
+                    <div class="input-group-append">
+                        <button class="btn btn-dark" type="button" onclick="getUserProfile(document.getElementById('searchAcc').value)">Search</button>
+                    </div>
+                </div>
+                <span id="usernameBanner" class="navbar-brand ms-auto">Welcome !</span>
+                <button class="btn btn-danger" id="logoutButton" onclick="logout()">Logout</button>
+            </div>
+        </div>      
+    </nav>
+
+    <div id="content" class="mt-4">
+    <div class="ClientProfile">
+        <h1>User Profile</h1>
+        <div id="ProfileInfoDisplay">
+        </div>
+        <div id="EditProfileBox" style="display: none;">
+            <form id="ClientEditForm" onsubmit="updateForm(event)">
+                <label for="uName">Username:</label>
+                <span id="uName"></span><br><br>
+                <label for="uPass">Password:</label><br>
+                <input type="password" id="uPass" name="uPass" oninput="comparePass()" required><br><br>
+                <label for="confPass">Confirm Password:</label><br>
+                <input type="password" id="confPass" name="confPass" oninput="comparePass()" required><br>
+                <span id="passwordErrMsg" style="display: none;vertical-align: top;"></span><br>
+                <label for="fullName" style="vertical-align: top;">Name:</label><br>
+                <input type="text" id="fullName" name="fullName" required><br><br>
+                <label for="phoneNum">Phone:</label><br>
+                <input type="text" id="phoneNum" name="phoneNum" required><br><br>
+                <label for="email">Email:</label><br>
+                <input type="email" id="email" name="email" required><br><br>
+                <label for="address">Address:</label><br>
+                <textarea id="address" name="address" rows="4" cols="50" required></textarea><br><br>
+                <label for="DOB">Date of Birth:</label>
+                <span id="DOB"></span><br><br>
+                <button type="submit">Save Changes</button>
+            </form>
+        </div>
+        <button id="EditProfileBtn" onclick="toggleEditProfile()">Edit Profile</button>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loader"></div>
+        <p class="loading-message" id="loadingMessage">Connecting to the blockchain......</p>
+      </div>
+    </div>
+    <script>
+        const allowRole = ['Client'];
+        
+        (async function () {
+        let profile;
+
+        async function getProfileInfo() {
+            try {
+                const token = localStorage.getItem('jwtToken');
+                console.log(token);
+
+                if (!token) {
+                    console.log('No token available.');
+                    return;
+                }
+
+                const response = await fetch('http://localhost:3000/getProfile', {
+                    method: 'GET',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to Connect.');
+                }
+
+                profile = await response.json();
+                console.log('Connected Successfully.');
+                console.log(profile);
+
+                tableDisplayProfile(profile);
+                console.log(profile);
+            } catch (error) {
+                console.error('Error occurred:', error.message);
+            }
+        }
+
+        async function updateForm(event){
+                event.preventDefault();
+                showLoadingOverlay();
+                console.log("In update form:", profile);
+
+                const updatedInfo = {
+                    uID: profile.profileInfo.userID,
+                    cID: profile.profileInfo.clientID,
+                    uName: profile.profileInfo.username,
+                    uPass: document.getElementById('uPass').value,
+                    secPhrase: profile.profileInfo.secPhrase,
+                    fName: document.getElementById('fullName').value,
+                    phNo: document.getElementById('phoneNum').value,
+                    email: document.getElementById('email').value,
+                    address: document.getElementById('address').value,
+                    DOB: profile.profileInfo.DOB,
+                }
+                console.log(updatedInfo);
+                const hashValue = await digestMessage(updatedInfo);
+                console.log("Hash value is: ", hashValue);
+                await insertUserHash(hashValue, profile.profileInfo.userID);
+                await updateUserDetails(updatedInfo);
+                window.location.reload();
+            }
+            hideLoadingOverlay();
+            window.getProfileInfo = getProfileInfo;
+            window.updateForm = updateForm;
+        })();
+
+        function tableDisplayProfile(data) {
+            console.log(data);
+            const profileDisplay = document.getElementById('ProfileInfoDisplay');
+            let formattedDate;
+                const profileDate = new Date(data.profileInfo.DOB);
+                if (!isNaN(profileDate)) {
+                        const year = profileDate.getFullYear();
+                        const month = String(profileDate.getMonth() + 1).padStart(2, '0');
+                        const day = String(profileDate.getDate()).padStart(2, '0');
+                        formattedDate = `${year}-${month}-${day}`;
+                    } else {
+                        formattedDate = "Invalid date.";
+                    }
+
+            profileDisplay.innerHTML = 
+            `
+            <p>Name: ${data.profileInfo.name}</p>
+            <p>Phone Number: ${data.profileInfo.phoneNo}</p>
+            <p>Email: ${data.profileInfo.email}</p>
+            <p>Address: ${data.profileInfo.address}</p>
+            <p>Date of Birth: ${formattedDate}</p>
+            <p>Account Status: ${data.profileInfo.accStatus}</p>
+            `;
+
+            document.getElementById("uName").textContent = data.profileInfo.username;
+            document.getElementById("uPass").value = data.profileInfo.password;
+            document.getElementById("confPass").value = data.profileInfo.password;
+            document.getElementById("fullName").value = data.profileInfo.name;
+            document.getElementById("phoneNum").value = data.profileInfo.phoneNo;
+            document.getElementById("email").value = data.profileInfo.email;
+            document.getElementById("address").value = data.profileInfo.address;
+            document.getElementById("DOB").textContent = formattedDate;
+        }
+        
+        function toggleEditProfile(){
+        const profileInfo = document.getElementById("ProfileInfoDisplay");
+        const editProfile = document.getElementById("EditProfileBox");
+        const editBtn = document.getElementById("EditProfileBtn");
+
+        if (editProfile.style.display === "none") {
+          profileInfo.style.display = "none";
+          editProfile.style.display = "block";
+          editBtn.innerHTML = "Cancel";
+        } else {
+          profileInfo.style.display = "block";
+          editProfile.style.display = "none";
+          editBtn.innerHTML = "Edit Profile";
+        }
+      };
+
+      function comparePass(){
+        if(document.getElementById("uPass").value !== document.getElementById("confPass").value)
+        {
+            document.getElementById("passwordErrMsg").textContent = "Passwords do not match";
+            document.getElementById("passwordErrMsg").style.display = "block";
+        }else{
+            document.getElementById("passwordErrMsg").textContent = " ";
+            document.getElementById("passwordErrMsg").style.display = "none";
+        }
+        console.log(document.getElementById("uPass").value, document.getElementById("confPass").value);
+      }
+
+    async function digestMessage(uUpdatedInfo) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(JSON.stringify(uUpdatedInfo));
+        const crypto = window.crypto || window.msCrypto;
+        const hashRaw = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashRaw));
+        const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+        return hashHex;
+    }
+
+    async function connectToMetaMask() {
+      if (window.ethereum && typeof window.ethereum.request === 'function') {
+        try {
+          await ethereum.request({ method: 'eth_requestAccounts' });
+          const accounts = await ethereum.request({ method: 'eth_accounts' });
+          console.log('Connected to MetaMask:', accounts[0]);
+          return accounts[0];
+        } catch (error) {
+          console.error('Failed to connect to MetaMask:', error);
+          throw error;
+          return null;
+        }
+      } else {
+        console.error('MetaMask extension is not found.');
+        throw error;
+        return null;
+      }
+    }
+
+    async function insertUserHash(userHash, userID) {
+    try {
+        const web3 = new Web3(ethereum);
+        const uHash = userHash;
+        const uID = userID;
+        const userAddress = await connectToMetaMask();
+
+        const contractAddress = "0x44d160f0345249590dbD4A36133D82e09Bc8Fc1B";
+        const contractABI = [
+        {
+            "anonymous": false,
+            "inputs": [
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "userID",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "hash",
+                "type": "string"
+            }
+            ],
+            "name": "UserHashStored",
+            "type": "event"
+        },
+        {
+            "inputs": [
+            {
+                "internalType": "string",
+                "name": "userID",
+                "type": "string"
+            }
+            ],
+            "name": "getUserHash",
+            "outputs": [
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+            {
+                "internalType": "string",
+                "name": "userID",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "hash",
+                "type": "string"
+            }
+            ],
+            "name": "storeUserHash",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }
+        ];
+
+        const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+        if (userAddress) {
+        await contract.methods.storeUserHash(uID, uHash).send({ from: userAddress });
+
+        console.log('User hash inserted successfully!');
+        } else {
+        console.error('Unable to connect to Metamask.');
+        throw new Error('Unable to connect to MetaMask.');
+        }
+        } catch (error) {
+        console.error('Unable to insert user hash:', error);
+        hideLoadingOverlay();
+        throw error;
+        }
+        //return userAddress;
+        }
+
+        async function updateUserDetails(updatedInfo){
+            try {
+                    const token = localStorage.getItem('jwtToken');
+                    console.log(token);
+
+                    if (!token) {
+                        console.log('No token available.');
+                        return;
+                    }
+
+                    const response = await fetch('http://localhost:3000/updateProfile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedInfo),
+                    });
+
+                    if (response.ok) {
+                    console.log('User details inserted successfully');
+                    } else {
+                    console.error('Error inserting user details');
+                    hideLoadingOverlay();
+                    }
+                } catch (error) {
+                    console.error('Error inserting user details:', error);
+                    throw error;
+                    hideLoadingOverlay();
+                }
+        }
+
+        function showLoadingOverlay() {
+        var loadingOverlay = document.getElementById("loadingOverlay");
+        var loadingMessage = document.getElementById("loadingMessage");
+        loadingOverlay.style.display = "flex";
+        loadingMessage.textContent = "Connecting to Blockchain......";
+    }
+
+    function hideLoadingOverlay() {
+        var loadingOverlay = document.getElementById("loadingOverlay");
+        loadingOverlay.style.display = "none";
+    }
+    </script>
+</body>
+</html>
