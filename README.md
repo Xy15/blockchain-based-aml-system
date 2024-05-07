@@ -5,4 +5,3 @@
 
 **Entity Relationship Diagram**
 ![image](https://github.com/Xy15/blockchain-based-aml-system/assets/58455555/611e0cfd-3db8-46b6-b0b9-a7ddfc943d2c)
-
