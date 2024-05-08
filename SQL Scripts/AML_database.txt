@@ -1,0 +1,97 @@
+CREATE DATABASE aml;
+
+USE aml;
+
+drop table appeals;
+drop table SuspiciousTransactions;
+drop table Transactions;
+drop table EthAccount;
+drop table BankAccount;
+drop table ComplianceOfficer;
+drop table Client;
+drop table User;
+
+CREATE TABLE User (
+  userID CHAR(6) NOT NULL,
+  username VARCHAR(50) NOT NULL UNIQUE,
+  password VARCHAR(50) NOT NULL,
+  secPhrase VARCHAR(20) NOT NULL,
+  name VARCHAR(50) NOT NULL,
+  phoneNo VARCHAR(11) NOT NULL,
+  email VARCHAR(25) NOT NULL,
+  address VARCHAR(60),
+  dateofbirth DATE,
+  PRIMARY KEY (userID)
+);
+
+CREATE TABLE Client (
+  clientID CHAR(6) NOT NULL,
+  accStatus VARCHAR(20) NOT NULL,
+  riskScore INT NOT NULL,
+  isBlacklisted BOOL NOT NULL,
+  userID CHAR(6) NOT NULL,
+  PRIMARY KEY (clientID),
+  FOREIGN KEY (userID) REFERENCES User(userID)
+);
+
+CREATE TABLE ComplianceOfficer (
+  officerID CHAR(6) NOT NULL,
+  hiredDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+  salary DECIMAL(18,8) NOT NULL,
+  position VARCHAR(20) NOT NULL,
+  userID CHAR(6) NOT NULL,
+  PRIMARY KEY (officerID),
+  FOREIGN KEY (userID) REFERENCES User(userID)
+);
+
+CREATE TABLE BankAccount (
+  accNo INT NOT NULL,
+  balance DECIMAL(18,8) NOT NULL,
+  accStatus VARCHAR(20) NOT NULL,
+  accType VARCHAR(50) NOT NULL,
+  ethAddress CHAR(42) NOT NULL,
+  clientID CHAR(6) NOT NULL,
+  PRIMARY KEY (accNo),
+  FOREIGN KEY (clientID) REFERENCES Client(clientID)
+);
+
+CREATE TABLE EthAccount (
+  ethAddress CHAR(42) NOT NULL,
+  password VARCHAR(20) NOT NULL,
+  officerID CHAR(6) NOT NULL,
+  PRIMARY KEY (ethAddress),
+  FOREIGN KEY (officerID) REFERENCES ComplianceOfficer(officerID)
+);
+
+CREATE TABLE Transactions (
+  transactionID INT NOT NULL AUTO_INCREMENT,
+  senderAddress CHAR(42) NOT NULL,
+  recipientAddress CHAR(42) NOT NULL,
+  method VARCHAR(10) NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  amount DECIMAL(18,8) NOT NULL,
+  timestamp INT NOT NULL,
+  transactionHash VARCHAR(66) NOT NULL UNIQUE,
+  PRIMARY KEY (transactionID)
+);
+
+CREATE TABLE SuspiciousTransactions (
+  susTransactionID INT NOT NULL REFERENCES Transactions(transactionID),
+  susDescription VARCHAR(255) NOT NULL,
+  transactionStatus VARCHAR(10) NOT NULL,
+  timeProcessed INT,
+  ethAddress CHAR(42),
+  PRIMARY KEY (susTransactionID),
+  FOREIGN KEY (ethAddress) REFERENCES EthAccount(ethAddress)
+);
+
+CREATE TABLE Appeals (
+  appealID CHAR(8) NOT NULL,
+  description VARCHAR(100) NOT NULL,
+  appealDate DATE NOT NULL,
+  filename VARCHAR(255) NOT NULL,
+  appealStat VARCHAR(8) NOT NULL,
+  clientID CHAR(6) NOT NULL,
+  PRIMARY KEY (appealID),
+  FOREIGN KEY (clientID) REFERENCES Client(clientID)
+);

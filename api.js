@@ -1,5 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
+require('dotenv').config()
 
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
@@ -8,7 +9,7 @@ const crypto = require('crypto');
 const multer = require("multer");
 const path = require("path");
 
-const port = 3000;
+const port = process.env.PORT;
 
 // Set up storage for appeal file uploads
 const storage = multer.diskStorage({
@@ -32,9 +33,9 @@ const mySecretKey = () => {
 const pool = mysql.createPool({
     connectionLimit: 30,
     host:'localhost',
-    user: '',       //replace with your database user
-    password:'',    //replace with your database user password
-    database: '',   //replace with your database name
+    user: process.env.USER,
+    password: process.env.PASSWORD,
+    database: process.env.DATABASE,
 });
 
 // Listen for the process exit event
